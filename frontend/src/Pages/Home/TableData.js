@@ -29,13 +29,16 @@ const TableData = (props) => {
 
   const handleEditSubmit = async (e) => {
     // e.preventDefault();
-
+    const token = localStorage.getItem("token");
     const {data} = await axios.put(`${editTransactions}/${currId}`, {
       ...values,
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if(data.success === true){
-
       await handleClose();
       await setRefresh(!refresh);
       window.location.reload();
@@ -43,15 +46,19 @@ const TableData = (props) => {
     else{
       console.log("error");
     }
-
   }
 
   const handleDeleteClick = async (itemKey) => {
-    console.log(user._id);
+    console.log(user.id);
     console.log("Clicked button ID delete:", itemKey);
     setCurrId(itemKey);
+    const token = localStorage.getItem("token");
     const {data} = await axios.post(`${deleteTransactions}/${itemKey}`,{
-      userId: props.user._id,
+      userId: props.user.id,
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if(data.success === true){
@@ -61,7 +68,6 @@ const TableData = (props) => {
     else{
       console.log("error");
     }
-
   };
 
   const [values, setValues] = useState({

@@ -51,9 +51,12 @@ export const registerControllers = async (req, res, next) => {
 }
 export const loginControllers = async (req, res, next) => {
     try {
+        console.log("Login request received:", req.body);
+
         const { email, password } = req.body;
 
         if (!email || !password) {
+            console.log("Missing email or password");
             return res.status(400).json({
                 success: false,
                 message: "Please enter All Fields",
@@ -61,8 +64,10 @@ export const loginControllers = async (req, res, next) => {
         }
 
         const user = await User.findOne({ email });
+        console.log("User found:", user);
 
         if (!user) {
+            console.log("User not found");
             return res.status(401).json({
                 success: false,
                 message: "User not found",
@@ -70,23 +75,33 @@ export const loginControllers = async (req, res, next) => {
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log("Password match:", isMatch);
 
         if (!isMatch) {
+            console.log("Incorrect password");
             return res.status(401).json({
                 success: false,
                 message: "Incorrect Email or Password",
             });
         }
 
+        console.log("JWT_SECRET:", process.env.JWT_SECRET);
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
         return res.status(200).json({
             success: true,
             message: `Welcome back, ${user.name}`,
-            user: { name: user.name, email: user.email, id: user._id },
+            user: {
+                name: user.name,
+                email: user.email,
+                id: user._id,
+                isAvatarImageSet: user.isAvatarImageSet,
+                avatarImage: user.avatarImage,
+            },
             token,
         });
     } catch (err) {
+        console.error("Login error:", err);
         return res.status(500).json({
             success: false,
             message: err.message,

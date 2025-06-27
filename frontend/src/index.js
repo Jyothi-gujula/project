@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <>
-    <ToastContainer />
+    <ToastContainer position="bottom-right" style={{ marginBottom: 20, marginRight: 20 }} />
     <App />
   </>
 );

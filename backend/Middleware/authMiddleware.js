@@ -1,10 +1,15 @@
 import jwt from "jsonwebtoken";
 
 export const authenticate = (req, res, next) => {
-    const token = req.header("Authorization");
+    let token = req.header("Authorization");
 
     if (!token) {
         return res.status(401).json({ success: false, message: "Access Denied" });
+    }
+
+    // Handle Bearer prefix
+    if (token.startsWith("Bearer ")) {
+        token = token.slice(7, token.length);
     }
 
     try {

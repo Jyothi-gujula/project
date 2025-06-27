@@ -5,8 +5,6 @@ import Particles from "react-tsparticles";
 import { loadFull } from "tsparticles";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { loginAPI } from "../../utils/ApiRequest";
 
@@ -55,11 +53,10 @@ const Login = () => {
 
     if (data.success === true) {
       localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
       navigate("/");
-      toast.success(data.message, toastOptions);
       setLoading(false);
     } else {
-      toast.error(data.message, toastOptions);
       setLoading(false);
     }
   };
@@ -74,7 +71,7 @@ const Login = () => {
   }, []);
 
   return (
-    <div style={{ position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: "#000", position: "relative", overflow: "hidden" }}>
       <Particles
         id="tsparticles"
         init={particlesInit}
@@ -141,21 +138,12 @@ const Login = () => {
           bottom: 0,
         }}
       />
-      <Container
-        className="mt-5"
-        style={{ position: "relative", zIndex: "2 !important" }}
-      >
-        <Row>
-          <Col md={{ span: 6, offset: 3 }}>
-            <h1 className="text-center mt-5">
-              <AccountBalanceWalletIcon
-                sx={{ fontSize: 40, color: "white" }}
-                className="text-center"
-              />
-            </h1>
-            <h2 className="text-white text-center ">Login</h2>
+      <Container className="d-flex flex-column align-items-center justify-content-start" style={{ minHeight: "100vh", paddingTop: "60px" }}>
+        <h2 className="text-white text-center mb-4">Login</h2>
+        <Row className="justify-content-center w-100">
+          <Col md={6} lg={4}>
             <Form>
-              <Form.Group controlId="formBasicEmail" className="mt-3">
+              <Form.Group controlId="formBasicEmail" className="mb-3">
                 <Form.Label className="text-white">Email address</Form.Label>
                 <Form.Control
                   type="email"
@@ -166,7 +154,7 @@ const Login = () => {
                 />
               </Form.Group>
 
-              <Form.Group controlId="formBasicPassword" className="mt-3">
+              <Form.Group controlId="formBasicPassword" className="mb-3">
                 <Form.Label className="text-white">Password</Form.Label>
                 <Form.Control
                   type="password"
@@ -209,10 +197,10 @@ const Login = () => {
             </Form>
           </Col>
         </Row>
-        <ToastContainer />
       </Container>
     </div>
   );
 };
 
 export default Login;
+

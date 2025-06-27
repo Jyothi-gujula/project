@@ -6,6 +6,9 @@ import transactionRoutes from "./Routers/Transactions.js";
 import userRoutes from "./Routers/userRouter.js";
 import { authenticate } from "./Middleware/authMiddleware.js";
 import { errorHandler } from "./Middleware/errorMiddleware.js";
+import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+dotenv.config();
 
 const app = express();
 const port = 4000;
@@ -19,7 +22,7 @@ app.use("/api/v1", authenticate, transactionRoutes);
 app.use("/api/auth", userRoutes);
 
 app.get("/", (req, res) => {
-  res.send("FinManager Server is working");
+  return res.status(200).json({ message: "Hello" });
 });
 
 app.use(errorHandler); // Global error handling

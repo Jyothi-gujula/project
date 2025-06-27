@@ -8,12 +8,13 @@ import Analytics from "./Analytics";
 import { useNavigate } from "react-router-dom";
 import { Button, Modal, Form, Container } from "react-bootstrap";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import BarChartIcon from "@mui/icons-material/BarChart";
+import { toast } from "react-toastify";
+
 const Home = () => {
   const navigate = useNavigate();
 
@@ -51,18 +52,18 @@ const Home = () => {
 
   useEffect(() => {
     const avatarFunc = async () => {
-      if (localStorage.getItem("user")) {
-        const user = JSON.parse(localStorage.getItem("user"));
-        console.log(user);
-
-        if (user.isAvatarImageSet === false || user.avatarImage === "") {
-          navigate("/setAvatar");
-        }
-        setcUser(user);
-        setRefresh(true);
-      } else {
-        navigate("/login");
+      const userStr = localStorage.getItem("user");
+      if (!userStr) {
+        navigate("/register");
+        return;
       }
+      const user = JSON.parse(userStr);
+      if (user.isAvatarImageSet === false || user.avatarImage === "") {
+        navigate("/setAvatar");
+        return;
+      }
+      setcUser(user);
+      setRefresh(true);
     };
 
     avatarFunc();
@@ -92,8 +93,7 @@ const Home = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { title, amount, description, category, date, transactionType } =
-      values;
+    const { title, amount, description, category, date, transactionType } = values;
 
     if (
       !title ||
@@ -104,25 +104,48 @@ const Home = () => {
       !transactionType
     ) {
       toast.error("Please enter all the fields", toastOptions);
+      return;
     }
+
     setLoading(true);
 
-    const { data } = await axios.post(addTransaction, {
-      title: title,
-      amount: amount,
-      description: description,
-      category: category,
-      date: date,
-      transactionType: transactionType,
-      userId: cUser._id,
-    });
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
 
-    if (data.success === true) {
-      toast.success(data.message, toastOptions);
-      handleClose();
-      setRefresh(!refresh);
-    } else {
-      toast.error(data.message, toastOptions);
+    if (!user || !user.id) {
+      toast.error("User not loaded. Please log in again.", toastOptions);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data } = await axios.post(
+        addTransaction,
+        {
+          title,
+          amount,
+          description,
+          category,
+          date,
+          transactionType,
+          userId: user.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (data.success === true) {
+        toast.success(data.message, toastOptions);
+        handleClose();
+        setRefresh((prev) => !prev);
+      } else {
+        toast.error(data.message, toastOptions);
+      }
+    } catch (err) {
+      toast.error("Error adding transaction", toastOptions);
     }
 
     setLoading(false);
@@ -135,36 +158,33 @@ const Home = () => {
     setFrequency("7");
   };
 
-
-  
-
-
   useEffect(() => {
+    if (!cUser || !cUser.id) return;
 
     const fetchAllTransactions = async () => {
       try {
         setLoading(true);
-        console.log(cUser._id, frequency, startDate, endDate, type);
+        const token = localStorage.getItem("token");
         const { data } = await axios.post(getTransactions, {
-          userId: cUser._id,
+          userId: cUser.id,
           frequency: frequency,
           startDate: startDate,
           endDate: endDate,
           type: type,
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
-        console.log(data);
-  
         setTransactions(data.transactions);
-  
         setLoading(false);
       } catch (err) {
-        // toast.error("Error please Try again...", toastOptions);
         setLoading(false);
       }
     };
 
     fetchAllTransactions();
-  }, [refresh, frequency, endDate, type, startDate]);
+  }, [cUser, refresh, frequency, endDate, type, startDate]);
 
   const handleTableClick = (e) => {
     setView("table");
@@ -185,7 +205,7 @@ const Home = () => {
       ) : (
         <>
           <Container
-            style={{ position: "relative", zIndex: "2 !important", backgroundColor:'black'  }}
+            style={{ position: "relative", zIndex: "2 !important" }}
             className="mt-3"
           >
             <div className="filterRow">
@@ -395,7 +415,6 @@ const Home = () => {
                 <Analytics transactions={transactions} user={cUser} />
               </>
             )}
-            <ToastContainer />
           </Container>
         </>
       )}

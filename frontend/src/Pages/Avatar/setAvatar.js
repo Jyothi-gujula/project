@@ -7,8 +7,6 @@ import spinner from "../../assets/gg.gif";
 import "./avatar.css";
 import { Button } from "react-bootstrap";
 import { setAvatarAPI } from "../../utils/ApiRequest.js";
-import Particles from "react-tsparticles";
-import { loadFull } from "tsparticles";
 
 const { uniqueNamesGenerator, animals, colors, countries, names, languages } =
   require("unique-names-generator");
@@ -37,7 +35,6 @@ const SetAvatar = () => {
   const navigate = useNavigate();
   const [selectedAvatar, setSelectedAvatar] = useState(undefined);
   const [loading, setLoading] = useState(false);
-  const [selectedSprite, setSelectedSprite] = useState(sprites[0]);
 
   useEffect(() => {
     if (!localStorage.getItem("user")) {
@@ -62,7 +59,7 @@ const SetAvatar = () => {
     const newSprite = e.target.value;
     if (newSprite) {
       setLoading(true);
-      setSelectedSprite(newSprite);
+      
 
       setImgURL(
         Array(4)
@@ -81,14 +78,23 @@ const SetAvatar = () => {
     }
 
     const user = JSON.parse(localStorage.getItem("user"));
-    const { data } = await axios.post(`${setAvatarAPI}/${user._id}`, {
-      image: imgURL[selectedAvatar],
-    });
+    const token = localStorage.getItem("token");
+
+    const { data } = await axios.post(
+      `${setAvatarAPI}/${user.id}`,
+      { image: imgURL[selectedAvatar] },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (data.isSet) {
       user.isAvatarImageSet = true;
       user.avatarImage = data.image;
       localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", data.token);
       toast.success("Avatar selected successfully");
       navigate("/");
     } else {
@@ -96,31 +102,10 @@ const SetAvatar = () => {
     }
   };
 
-  const particlesInit = useCallback(async (engine) => {
-    await loadFull(engine);
-  }, []);
-
   return (
     <>
-      <div style={{ position: "relative", overflow: "hidden" }}>
-        <Particles
-          id="tsparticles"
-          init={particlesInit}
-          options={{
-            background: { color: { value: "#000" } },
-            fpsLimit: 60,
-            particles: {
-              number: { value: 200, density: { enable: true, value_area: 800 } },
-              color: { value: "#ffcc00" },
-              shape: { type: "circle" },
-              opacity: { value: 0.5, random: true },
-              size: { value: 3, random: { enable: true, minimumValue: 1 } },
-              move: { enable: true, speed: 2 },
-            },
-            detectRetina: true,
-          }}
-          style={{ position: "absolute", zIndex: -1, top: 0, left: 0, right: 0, bottom: 0 }}
-        />
+      <div style={{ position: "relative" }}>
+        
 
         {loading ? (
           <div className="container containerBox">
@@ -158,12 +143,26 @@ const SetAvatar = () => {
                 ))}
               </select>
 
-              <Button onClick={setProfilePicture} className="mt-5">
+              <Button 
+                onClick={setProfilePicture} 
+                className="mt-5"
+                style={{ 
+                  zIndex: 1000, 
+                  position: 'relative',
+                  backgroundColor: '#007bff',
+                  borderColor: '#007bff',
+                  color: 'white',
+                  padding: '10px 20px',
+                  borderRadius: '5px',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
                 Set as Profile Picture
               </Button>
             </div>
-
-            <ToastContainer />
           </div>
         )}
       </div>
