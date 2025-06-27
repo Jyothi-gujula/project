@@ -14,7 +14,16 @@ const app = express();
 const port = 4000;
 
 connectDB();
-app.use(cors());
+
+// CORS MUST BE FIRST!
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "https://project-g3q3pykbr-jyothis-projects-bbcc3da1.vercel.app"
+  ],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
