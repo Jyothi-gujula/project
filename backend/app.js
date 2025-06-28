@@ -26,6 +26,15 @@ app.use(cors({
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+// Test route to verify deployment
+app.get("/test", (req, res) => {
+  return res.status(200).json({ 
+    message: "Test endpoint working!",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 app.use("/api/v1", authenticate, transactionRoutes);
 app.use("/api/auth", userRoutes);
 
