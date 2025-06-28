@@ -8,8 +8,12 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "backend/app.js"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/backend/app.js"
+      "dest": "backend/app.js"
     }
   ],
   "env": {
