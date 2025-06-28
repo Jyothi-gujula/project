@@ -11,17 +11,16 @@ import jwt from "jsonwebtoken";
 dotenv.config();
 
 const app = express();
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 connectDB();
 
-// CORS MUST BE FIRST!
+// CORS configuration - Allow all origins for now
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://project-g3q3pykbr-jyothis-projects-bbcc3da1.vercel.app"
-  ],
-  credentials: true
+  origin: "*", // Allow all origins
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token', 'Origin', 'Accept']
 }));
 
 app.use(express.json());
@@ -31,11 +30,11 @@ app.use("/api/v1", authenticate, transactionRoutes);
 app.use("/api/auth", userRoutes);
 
 app.get("/", (req, res) => {
-  return res.status(200).json({ message: "Hello" });
+  return res.status(200).json({ message: "Financial Manager API is running!" });
 });
 
 app.use(errorHandler); // Global error handling
 
 app.listen(port, () => {
-  console.log(`Server is listening on http://localhost:${port}`);
+  console.log(`Server is listening on port ${port}`);
 });

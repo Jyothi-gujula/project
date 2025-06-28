@@ -91,17 +91,39 @@ export const getAllTransactionController = async (req, res) => {
 
     // Add date conditions based on 'frequency' and 'custom' range
     if (frequency !== 'custom') {
+      let startOfPeriod, endOfPeriod;
+      
+      switch (frequency) {
+        case '7': // Last Week
+          startOfPeriod = moment().subtract(1, 'week').startOf('week');
+          endOfPeriod = moment().subtract(1, 'week').endOf('week');
+          break;
+        case '30': // Last Month
+          startOfPeriod = moment().subtract(1, 'month').startOf('month');
+          endOfPeriod = moment().subtract(1, 'month').endOf('month');
+          break;
+        case '365': // Last Year
+          startOfPeriod = moment().subtract(1, 'year').startOf('year');
+          endOfPeriod = moment().subtract(1, 'year').endOf('year');
+          break;
+        default:
+          // Default to last 7 days if frequency is not recognized
+          startOfPeriod = moment().subtract(7, 'days').startOf('day');
+          endOfPeriod = moment().endOf('day');
+      }
+      
       query.date = {
-        $gt: moment().subtract(Number(frequency), "days").toDate()
+        $gte: startOfPeriod.toDate(),
+        $lte: endOfPeriod.toDate()
       };
     } else if (startDate && endDate) {
       query.date = {
-        $gte: moment(startDate).toDate(),
-        $lte: moment(endDate).toDate(),
+        $gte: moment(startDate).startOf('day').toDate(),
+        $lte: moment(endDate).endOf('day').toDate(),
       };
     }
 
-    // console.log(query);
+    console.log('Date query:', query.date);
 
     const transactions = await Transaction.find(query);
     //select * from transaction where date>18/02/2025

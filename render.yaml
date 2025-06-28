@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: financial-manager-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://your-backend-url.vercel.app  # We'll update this after backend deployment 

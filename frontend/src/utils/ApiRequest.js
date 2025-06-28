@@ -1,4 +1,6 @@
-const host = "http://localhost:4000";
+// API URL - will be set via environment variable in production
+const host = process.env.REACT_APP_API_URL || "http://localhost:4000";
+
 export const setAvatarAPI = `${host}/api/auth/setAvatar`;
 export const registerAPI = `${host}/api/auth/register`;
 export const loginAPI = `${host}/api/auth/login`;
