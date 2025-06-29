@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 
 export const connectDB = async () => {
     try {
-        //mongo server url
-        const url = "mongodb://127.0.0.1:27017/finmanager";
+        // Use environment variable for MongoDB URL in production
+        const url = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/finmanager";
         const {connection} = await mongoose.connect(url, {
             useNewUrlParser: true,
             useUnifiedTopology: true
