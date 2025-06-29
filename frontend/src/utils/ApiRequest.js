@@ -1,9 +1,9 @@
+import axios from 'axios';
+
 // API URL - will be set via environment variable in production
 const host = process.env.REACT_APP_API_URL || "http://localhost:4000";
 
 // Create axios instance with mobile-friendly configuration
-import axios from 'axios';
-
 const apiClient = axios.create({
   baseURL: host,
   timeout: 15000, // 15 second timeout
