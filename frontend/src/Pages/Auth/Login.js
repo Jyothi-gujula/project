@@ -7,6 +7,7 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { loginAPI } from "../../utils/ApiRequest";
+import { toast } from "react-hot-toast";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -44,19 +45,46 @@ const Login = () => {
 
     const { email, password } = values;
 
+    if (!email || !password) {
+      toast.error("Please enter all fields", toastOptions);
+      return;
+    }
+
     setLoading(true);
 
-    const { data } = await axios.post(loginAPI, {
-      email,
-      password,
-    });
+    try {
+      const { data } = await axios.post(loginAPI, {
+        email,
+        password,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        timeout: 10000, // 10 second timeout
+      });
 
-    if (data.success === true) {
-      localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("token", data.token);
-      navigate("/");
-      setLoading(false);
-    } else {
+      if (data.success === true) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("token", data.token);
+        toast.success(`Welcome back, ${data.user.name}!`, toastOptions);
+        navigate("/");
+      } else {
+        toast.error(data.message || "Login failed", toastOptions);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      if (err.response) {
+        // Server responded with error
+        toast.error(err.response.data.message || "Login failed", toastOptions);
+      } else if (err.request) {
+        // Network error
+        toast.error("Network error. Please check your connection.", toastOptions);
+      } else {
+        // Other error
+        toast.error("An error occurred. Please try again.", toastOptions);
+      }
+    } finally {
       setLoading(false);
     }
   };
